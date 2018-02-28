@@ -3,16 +3,13 @@
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
-//Httpful is a excellent curl-based wrapper for REST services
-//See: https://github.com/nategood/httpful
-//Heroku does not support phar's normally, so using bootstrap here
-require('httpful/src/Httpful/Bootstrap.php');
-\Httpful\Bootstrap::init();
-
 //In Canvas via SignedRequest/POST, the authentication should be passed via the signed_request header
 //You can also use OAuth/GET based flows
+echo '<pre>';
+print_r($_REQUEST);
 $signedRequest = $_REQUEST['signed_request'];
-$consumer_secret = $_ENV['CANVAS_CONSUMER_SECRET'];
+$consumer_secret = $_ENV['secret'];
+
 if ($signedRequest == null || $consumer_secret == null) {
    echo "Error: Signed Request or Consumer Secret not found";
 }
@@ -26,60 +23,50 @@ if ($calcedSig != $encodedSig) {
    echo "Error: Signed Request Failed.  Is the app in Canvas?";
 }
 
-
-//decode the signedRequest
-$sep = strpos($signedRequest, '.');
-$encodedSig = substr($signedRequest, 0, $sep);
-$encodedEnv = substr($signedRequest, $sep + 1);
-
 //decode the signed request object
-$req = json_decode(base64_decode($encodedEnv));
-
-//As of Spring '13: SignedRequest has a client object which holds the pertinent authentication info
-$access_token = $req->client->oauthToken;
-$instance_url = $req->client->instanceUrl;
-
-$invoiceID = $req->context->environment->parameters->invoiceId;
-//define your URI based on the user's instance 
-$uri = $instance_url."/services/data/v26.0/query?q=SELECT+ID,Merchandise__r.Name+FROM+Line_Item__c+WHERE+Invoice__c+=+'".$invoiceID."'";
-
-//create REST request and decode result
-$result = \Httpful\Request::get($uri)
-    ->Authorization("OAuth ".$access_token)                
-    ->addHeader("Content-Type","application/json") 
-    ->send();
-$result = json_decode($result); //auto-parsing doesn't seem to work
-
+$sr = base64_decode($encodedEnv);
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
+<script src='scripts/jquery-1.5.1.js'></script>
+<script type="text/javascript" src="/sdk/js/canvas.js"></script>
+<script type="text/javascript" src="/sdk/js/cookies.js"></script>
+<script type="text/javascript" src="/sdk/js/oauth.js"></script>
+<script type="text/javascript" src="/sdk/js/xd.js"></script>
+<script type="text/javascript" src="/sdk/js/client.js"></script>
+<script type="text/javascript" src="/scripts/json2.js"></script>
+<script src='scripts/ICanHaz.js'></script>
+<script>
+        var url = "/services/data/v26.0/query?q=SELECT+ID,NAME+FROM+ACCOUNT";
+        var sr = JSON.parse('<?=$sr?>');
+        
+        $(document).ready(function() {
+        console.debug(sr);
+        $('#user-name').html(sr.context.user.fullName);
+        
+        
+        //within a Canvas iFrame, AJAX calls proxy via the window messaging
+        Sfdc.canvas.client.ajax(url,
+            {   client : sr.client,
+                method: 'GET',
+                contentType: "application/json",
+                success : function(data) {
+                        console.debug('Got Data');
+                        console.debug(data);
+                        $('#accountTable').append(ich.accounts(data.payload));
+                }
+            }); 
+        });
+</script>
 
-<html lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Account List</title>
-    <script>
-    console.log(<?=base64_decode($encodedEnv)?>);
+</script>
+Hello, <span id='user-name'></span>
+<table id="accountTable">
+    <tr><td><strong>Recent Accounts</strong></td></tr>
+    <script type="text/html" id="accounts">
+            {{#records}}
+            <tr><td>{{Name}}</td></tr> 
+            {{/records}}
     </script>
-    <style>
-    body { font-family: Verdana; }
-    table { width: 80%; }
-    h4 { border-bottom:thick dotted #00ff00; }
-    td { border-bottom:1px solid black; }
-    </style>
-</head>
-<body>
-<H4>Warehouse Tracking</H4>
-<table>
-    <tr >
-        <td><b>Item</b></td><td><b>Stock Row</b></td><td><b>Stock Column</b></td></tr>
-    <?foreach($result->records as $rec) {
-        echo "<tr><td>".$rec->Merchandise__r->Name."</td>";
-        echo "<td>".rand(5, 15)."</td>";
-        echo "<td>".rand(5, 15)."</td>";
-        echo"</tr>";        
-    }?>
-    </table>
-</body>
-</html>
+</table>
+     
+</apex:page>
