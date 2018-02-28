@@ -6,7 +6,7 @@ ini_set("display_errors", 1);
 //In Canvas via SignedRequest/POST, the authentication should be passed via the signed_request header
 //You can also use OAuth/GET based flows
 $signedRequest = $_REQUEST['signed_request'];
-$consumer_secret = $_ENV['secret'];
+$consumer_secret = '8454525895187521239';//$_ENV['secret'];
 
 if ($signedRequest == null || $consumer_secret == null) {
    echo "Error: Signed Request or Consumer Secret not found";
@@ -34,7 +34,7 @@ $sr = base64_decode($encodedEnv);
 <script type="text/javascript" src="/scripts/json2.js"></script>
 <script src='scripts/ICanHaz.js'></script>
 <script>
-        var url = "/services/data/v26.0/query?q=3MVG9d8..z.hDcPJbNOX.OEoxtA0_fiXDiTpldldHTLfdtAK1fPl4fuRC8oGq_OSU7eGA1upK2amXIWMPSzYe,canvasphprn";
+        var url = "/services/data/v26.0/query?q=8454525895187521239,canvasphprn";
 		var sr = JSON.parse('<?=$sr?>');
 		
         $(document).ready(function() {
