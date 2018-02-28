@@ -34,7 +34,7 @@ $sr = base64_decode($encodedEnv);
 <script type="text/javascript" src="/scripts/json2.js"></script>
 <script src='scripts/ICanHaz.js'></script>
 <script>
-        var url = "/services/data/v26.0/query?q=8454525895187521239,canvasphprn";
+        var url = "/services/data/v26.0/query?q=3MVG9d8..z.hDcPJbNOX.OEoxtA0_fiXDiTpldldHTLfdtAK1fPl4fuRC8oGq_OSU7eGA1upK2amXIWMPSzYe,canvasphprn";
 		var sr = JSON.parse('<?=$sr?>');
 		
         $(document).ready(function() {
