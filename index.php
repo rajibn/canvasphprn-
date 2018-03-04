@@ -8,7 +8,7 @@ ini_set("display_errors", 1);
 echo '<pre>';
 print_r($_REQUEST);
 $signedRequest = $_REQUEST['signed_request'];
-$consumer_secret = $_ENV['secret'];
+$consumer_secret = $_ENV['CANVAS_CONSUMER_SECRET'];
 
 if ($signedRequest == null || $consumer_secret == null) {
    echo "Error: Signed Request or Consumer Secret not found";
