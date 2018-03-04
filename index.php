@@ -7,7 +7,7 @@ ini_set("display_errors", 1);
 //You can also use OAuth/GET based flows
 echo '<pre>';
 print_r($_REQUEST);
-$signedRequest = $_REQUEST['signed_request'];
+$signedRequest = '3MVG9d8..z.hDcPJbNOX.OEoxtA0_fiXDiTpldldHTLfdtAK1fPl4fuRC8oGq_OSU7eGA1upK2amXIWMPSzYe';//$_REQUEST['signed_request'];
 $consumer_secret = $_ENV['CANVAS_CONSUMER_SECRET'];
 
 if ($signedRequest == null || $consumer_secret == null) {
